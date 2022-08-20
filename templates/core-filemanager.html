@@ -1,0 +1,490 @@
+{% extends "core-template.html" %}
+
+{% block title %}
+    <title>{{ website_title }} - 文件管理器</title>
+    <style>.layui-table-box{height: 40em;}</style>
+{% endblock %}
+
+{% block body %}
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <div class="layui-row layui-col-space15">
+                <form id="path_form" class="layui-form" action="" method="post" lay-filter="">
+
+                    <div class="layui-form-item">
+
+                        <input style="margin-top: 0.5em;height: 2em;width: 100%;display: revert;" id="path_input"
+                               name="path" lay-verify="title"
+                               autocomplete="off" class="layui-input">
+                    </div>
+                    <span id="nav_path" class="layui-breadcrumb" lay-separator=">"
+                          style="margin: 8px;width: inherit;word-break:break-all;white-space: normal;"></span>
+                </form>
+
+                <div id="main">
+                    <table id="filemanager" lay-filter="filemanager"></table>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+        /*
+            获取选中数据方法：
+            data = table.checkStatus('filemanager').data
+
+            定义变量如下（URL请传入下划线后面的参数，比如 我想要看 D:\folder 文件夹，就传入 ?path=D:\folder ）：
+            filemanager_path -- 目前路径
+            filemanager_module -- 采用模块
+            filemanager_checkedOnly -- 仅选择一项 传入 yes
+            filemanager_checkedOnly_data -- 仅选择一项的数据
+            filemanager_checkStatus -- 所有多选数据
+            filemanager_disable_more -- 禁用更多操作 传入 yes
+            filemanager_disable_double -- 禁用双击文件操作 传入 yes
+         */
+
+        function getUrlParam(name) {
+            // 获取URL参数
+            let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            let r = window.location.search.substr(1).match(reg);
+            if (r != null) {
+                return decodeURI(r[2]);
+            }
+            return null;
+        }
+
+        // 返回字符串第 n 个出现的位置
+        function string_find(str, cha, num) {
+            var x = str.indexOf(cha);
+            for (var i = 0; i < num; i++) {
+                x = str.indexOf(cha, x + 1);
+            }
+            return x;
+        }
+
+
+        filemanager_path = getUrlParam("path");  // 文件管理器查询路径
+        filemanager_module = getUrlParam("module");  // 文件管理器查询的模块
+        filemanager_checkedOnly = getUrlParam("checkedOnly") === "yes";  // 仅选择一项
+        filemanager_checkedOnly_data = null;  // 仅选择一项数据
+        filemanager_checkStatus = {data: [], isAll: false};  // 多选状态
+        filemanager_disable_more = getUrlParam("disable_more") === "yes";  // 禁用更多操作
+        filemanager_disable_double = getUrlParam("disable_double") === "yes";  // 禁用双击操作文件
+        if (getUrlParam("path") === null) {
+            filemanager_path = "/"
+        }
+        if (getUrlParam("module") === null) {
+            filemanager_module = "systemfile"
+        }
+
+        document.querySelector("#path_input").value = filemanager_path;
+
+
+        cols = []
+
+        if (!filemanager_checkedOnly) {
+            cols.push({type: "checkbox", checkbox: true})
+        }
+
+        cols.push(
+            {field: 'thumbHTML', title: '图标', width: 64, align: "center"},
+            {field: 'filename', title: '文件名', width: 200, sort: true},
+            {field: 'created', title: '文件创建日期', width: 200, sort: true},
+            {field: 'type', title: '类型', width: 80, sort: true},
+            {field: 'typename', title: '文件类型', width: 200, sort: true},
+            {field: 'size', title: '大小', width: 200, sort: true},
+            {field: 'modified', title: '文件修改日期', width: 200, sort: true}
+        )
+
+
+        // 公开方法 改变请求
+        function filemanager_request(path, target = "list_path", data = null, module = filemanager_module) {
+            filemanager_module = module;
+            filemanager_path = path;
+            document.querySelector("#path_input").value = path;
+            layui.use('table', function () {
+                let table = layui.table;
+                table.reload(
+                    "filemanager", {
+                        where: {
+                            module: filemanager_module,
+                            target: target,
+                            path: JSON.stringify(filemanager_path),
+                            data: JSON.stringify(data)
+                        }
+                    });
+            });
+        }
+
+        // 公开方法 异步请求
+        function ajax_request(url, data) {
+            layui.use(['jquery', 'toast'], function () {
+                let $ = layui.jquery,
+                    layer = layui.layer,
+                    toast = layui.toast;
+                layer.msg("等待服务器响应......", {timeout: -1});
+                $.ajax({
+                    url: url,
+                    type: "post",
+                    data: data,
+                    dataType: "json",
+                    success: function (data) {
+                        layer.closeAll()
+                        if (data['code'] === 0) {
+                            toast.success({title: '成功', message: data['msg'], position: 'topCenter'});
+                            filemanager_request(filemanager_path)
+                        } else {
+                            toast.error({title: '失败', message: data['msg'], position: 'topCenter'});
+                        }
+                    },
+                    error: function (data) {
+                        toast.error({title: '错误', message: "请求出现了异常，请稍后再试......", position: 'topCenter'});
+                    }
+                });
+            })
+        }
+
+
+        el = window.document.body;  //声明一个变量，默认值为body
+        window.document.body.onmouseover = function (event) {
+            el = event.target;//鼠标每经过一个元素，就把该元素赋值给变量el
+        }
+
+        layui.use(['table', 'dropdown', 'upload', 'element', 'toast'], function () {
+            let table = layui.table,
+                dropdown = layui.dropdown,
+                upload = layui.upload,
+                element = layui.element,
+                layer = layui.layer,
+                toast = layui.toast,
+                $ = layui.jquery;
+
+            layer.config({
+                skin: 'layui-layer-easy'
+            });
+
+            // 表格渲染
+            table.render({
+                elem: '#filemanager',
+                url: '/api/filemanager',
+                method: "post",
+                skin: "line",
+                page: false,
+                escape: false,
+                autoSort: true,
+                toolbar: '#toolbar',
+                height: '620px',
+                initSort: {
+                    field: 'type', //排序字段，对应 cols 设定的各字段名
+                    type: 'asc'
+                },
+                where: {
+                    module: filemanager_module,
+                    target: "list_path",
+                    path: JSON.stringify(filemanager_path)
+                },
+                done: function () {
+                    // UI 显示
+                    if (!filemanager_disable_more) {
+                        document.querySelector("#more").style.display = "";
+                        document.querySelector("#more").style.visibility = "";
+                    }
+                    // 更多操作
+                    dropdown.render({
+                        elem: '#more',
+                        data: [
+                            {
+                                id: 'create_folder',
+                                title: '新建文件夹'
+                            }, {
+                                id: 'download',
+                                title: '下载文件'
+                            },
+                            {
+                                id: 'upload',
+                                title: '上传文件'
+                            },
+                            {
+                                id: 'rename',
+                                title: '重命名'
+                            },
+                            {
+                                id: 'delete',
+                                title: '删除'
+                            }
+                        ],
+                        click: function (obj) {
+                            let filenames = [];
+                            let data = table.checkStatus('filemanager').data;
+                            if (data.length === 0) {
+                                if (filemanager_checkedOnly_data !== null) {
+                                    data.push(filemanager_checkedOnly_data)
+                                }
+                            }
+                            data.forEach(function (currentValue, index, arr) {
+                                filenames.push(data[index].filename)
+                            });
+                            switch (obj.id) {
+                                case 'create_folder':
+                                    layer.prompt({title: "输入新文件夹名"}, function (value, index, elem) {
+                                        ajax_request("/api/filemanager", {
+                                            module: filemanager_module,
+                                            path: JSON.stringify(filemanager_path),
+                                            target: 'create_folder',
+                                            data: JSON.stringify(value)
+                                        })
+                                        layer.close(index);
+                                    });
+                                    break;
+                                case 'download':
+                                    if (filenames.length === 0) {
+                                        toast.error({title: '错误', message: '至少选择一个文件。', position: 'topCenter'});
+                                        break
+                                    }
+                                    window.open("/api/filemanager?target=download_file&module=" + filemanager_module + "&path=" + JSON.stringify(filemanager_path) + "&data=" + JSON.stringify(filenames))
+                                    break;
+                                case 'upload':
+                                    document.querySelector("#upload").click();
+                                    break;
+                                case 'rename':
+                                    if (filenames.length !== 1) {
+                                        toast.error({title: '错误', message: '至少/只能选择一个文件。', position: 'topCenter'});
+                                        break
+                                    }
+                                    layer.prompt({title: "输入新的名称"}, function (value, index, elem) {
+                                        ajax_request("/api/filemanager", {
+                                            module: filemanager_module,
+                                            path: JSON.stringify(filemanager_path),
+                                            target: 'rename',
+                                            data: JSON.stringify([filenames[0], value])
+                                        })
+                                        layer.close(index);
+                                    });
+                                    break;
+                                case 'delete':
+                                    if (filenames.length === 0) {
+                                        toast.error({title: '错误', message: '至少选择一个文件。', position: 'topCenter'});
+                                        break
+                                    }
+                                    layer.confirm("确定删除吗？", function () {
+                                        ajax_request("/api/filemanager", {
+                                            module: filemanager_module,
+                                            path: JSON.stringify(filemanager_path),
+                                            target: 'delete_file',
+                                            data: JSON.stringify(filenames)
+                                        })
+                                    })
+                                    break;
+                            }
+                        }
+                    });
+
+                    // 上传文件
+                    upload.render({
+                        elem: '#upload',
+                        url: '/api/filemanager',
+                        field: "data",
+                        accept: "file",
+                        multiple: true,
+                        data: {
+                            path: JSON.stringify(filemanager_path),
+                            target: "upload_file",
+                            module: filemanager_module
+                        },
+                        before: function (obj) {
+                            layer.open({
+                                title: '上传进度',
+                                content: '<div class="layui-progress" lay-filter="upload_progress"><div class="layui-progress-bar"></div></div><div><a id="upload_progress_text">0%</a></div>',
+                                btn: false,
+                                closeBtn: false
+                            });
+                        },
+                        allDone: function (res) {
+                            toast.success({title: '成功', message: '上传文件成功！', position: 'topCenter'});
+                            layer.closeAll();
+                            filemanager_request(filemanager_path)
+                        },
+                        error: function () {
+                            toast.error({title: '错误', message: '上传文件失败......', position: 'topCenter'});
+                            layer.closeAll();
+                            filemanager_request(filemanager_path)
+                        },
+                        progress: function (n, elem, res, index) {
+                            let percent = n + '%'; //获取进度百分比
+                            element.progress('upload_progress', percent);
+                            document.querySelector("#upload_progress_text").text = "上传第 " + parseInt(index.substring(index.lastIndexOf("-") + 1) + 1).toString() + " 个文件：" + percent;
+                            if (n === 100) {
+                                document.querySelector("#upload_progress_text").text = "服务器处理中......";
+                            }
+                        }
+                    });
+                },
+                parseData: function (res) {
+                    // 返回参数的处理
+                    if (res.path !== undefined) {
+                        filemanager_checkStatus = {data: [], isAll: false};
+                        filemanager_checkedOnly_data = null;
+                        filemanager_path = res.path;
+                        if (filemanager_path.substring(0, 10) !== "function::") {
+                            let nav_html = ""
+                            filemanager_path.split("/").forEach(function (currentValue, index, arr) {
+                                if (currentValue !== "") {
+                                    let path = filemanager_path.substring(0, string_find(filemanager_path, "/", index));
+                                    if (path !== "") {
+                                        nav_html += '<a href="javascript:filemanager_request(\'' + path
+                                            + '\')">' + currentValue + '</a>'
+                                        nav_html += '<span lay-separator="">&gt;</span>'
+                                    } else {
+                                        nav_html += '<a>' + currentValue + '</a>'
+                                        nav_html += '<span lay-separator="">&gt;</span>'
+                                    }
+                                }
+                            });
+                            document.querySelector("#nav_path").innerHTML = nav_html;
+                            if (filemanager_path.substring(filemanager_path.length - 1) !== "/") {
+                                filemanager_path += "/"
+                            }
+                        }
+                        document.querySelector("#path_input").value = filemanager_path;
+                    }
+                    if (res.data !== undefined) {
+                        res.data.forEach(function (currentValue, index, arr) {
+                            res.data[index].thumbHTML = '<img src="' + res.data[index].thumb + '" style="width: 30px;height: 30px" />'
+                        });
+                    }
+                    return res
+                },
+                cols: [cols]
+            });
+
+            // 多选择项事件
+            table.on('checkbox(filemanager)', function (obj) {
+                filemanager_checkStatus = table.checkStatus('filemanager');
+            });
+
+            // 单击事件
+            table.on('row(filemanager)', function (obj) {
+                filemanager_checkedOnly_data = obj.data;
+                //标注选中样式
+                obj.tr.addClass('layui-table-click').siblings().removeClass('layui-table-click');
+            });
+
+            // 双击时事件
+            table.on('rowDouble(filemanager)', function (obj) {
+                if (el.className !== 'layui-icon layui-icon-ok') {
+                    let data = obj.data;
+                    switch (data['type']) {
+                        case "DIR":
+                            if (data['filename'] === "..") {
+                                let pos = filemanager_path.lastIndexOf("/", filemanager_path.length - 2);
+                                if (pos !== -1) filemanager_path = filemanager_path.substring(0, pos + 1);
+                            } else {
+                                filemanager_path = filemanager_path + data['filename'] + "/";
+                            }
+                            filemanager_request(filemanager_path);
+                            break;
+                        case "DISK":
+                            filemanager_request(data['filename']);
+                            break;
+                        case "FILE":
+                            if (filemanager_disable_double) break;
+                            layer.open({
+                                title: '选择对应操作',
+                                btnAlign: 'c',
+                                content: '<div style="padding: 15px;">' +
+                                    "选择文件名: " + data.filename + "<br>" +
+                                    "文件路径: " + filemanager_path + "<br>" +
+                                    "文件大小: " + data.size + "<br>" +
+                                    "文件类型: " + data.typename + "<br>" +
+                                    "文件创建日期: " + data.created + "<br>" +
+                                    "文件修改日期: " + data.modified + "<br><br>" +
+                                    "请选择你想要的操作：" + '</div>',
+                                btn: ['下载文件', '删除文件', '取消'],
+                                yes: function (index, layero) {
+                                    window.open("/api/filemanager?target=download_file&module=" + filemanager_module + "&path=" + JSON.stringify(filemanager_path) + "&data=" + JSON.stringify(data.filename))
+                                },
+                                btn2: function (index, layero) {
+                                    layer.confirm("确定删除吗？", function () {
+                                        ajax_request("/api/filemanager", {
+                                            module: filemanager_module,
+                                            path: JSON.stringify(filemanager_path),
+                                            target: 'delete_file',
+                                            data: JSON.stringify(data.filename)
+                                        })
+                                    })
+                                },
+                                btn3: function (index, layero) {
+                                    return true;
+                                },
+                                success: function (layero, index) {
+                                    // 给按钮添加特效
+                                    document.getElementsByClassName("layui-layer-btn1")[0].className += " layui-btn-primary layui-border-red"
+                                }
+                            });
+                            break;
+                        default:
+                            return;
+                    }
+                }
+            });
+
+            // 工具栏选择
+            table.on('toolbar(filemanager)', function (obj) {
+                switch (obj.event) {
+                    case 'show_disk':
+                        filemanager_request("function::show_disk", "function", "show_disk")
+                        return;
+                    case 'back':
+                        let pos = filemanager_path.lastIndexOf("/", filemanager_path.length - 2);
+                        if (pos !== -1) filemanager_path = filemanager_path.substring(0, pos + 1);
+                        filemanager_request(filemanager_path)
+                        break;
+                    case 'refresh':
+                        filemanager_request(filemanager_path)
+                        break;
+                }
+
+            });
+
+            // 路径的查看
+            $("#path_form").submit(function () {
+                filemanager_path = document.querySelector("#path_input").value
+
+                if (filemanager_path.substring(0, 10) === "function::") {
+                    filemanager_request(filemanager_path, "function", filemanager_path.substring(10));
+                } else {
+                    filemanager_request(filemanager_path)
+                }
+                return false; //阻止表单的默认提交事件
+
+            });
+
+
+        });
+
+
+        // 禁止选中文字，美观
+        document.querySelector("#main").addEventListener('selectstart', function (e) {
+            e.preventDefault();
+        });
+
+
+    </script>
+    <script type="text/html" id="toolbar">
+        <div class="layui-btn-container">
+            <button class="layui-btn layui-btn-sm" lay-event="show_disk" style="margin-left: 5px;">磁盘</button>
+            <button class="layui-btn layui-btn-sm" lay-event="back">回退</button>
+            <button class="layui-btn layui-btn-sm" lay-event="refresh">刷新</button>
+            <button class="layui-btn layui-btn-sm" id="upload" style="display: none;visibility: hidden;">上传文件</button>
+            <button class="layui-btn layui-btn-sm layui-bg-blue" id="more" style="display: none;visibility: hidden;margin-left: 5px;">
+                操作
+                <i class="layui-icon layui-icon-down layui-font-12"></i>
+            </button>
+        </div>
+    </script>
+
+{% endblock %}

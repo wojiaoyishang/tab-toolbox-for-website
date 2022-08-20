@@ -1,0 +1,228 @@
+{% extends "core-template.html" %}
+
+{% block title %}
+    <title>仪表盘</title>
+{% endblock %}
+
+{% block body %}
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md8">
+                <div class="layui-row layui-col-space15">
+                    <div class="layui-col-md6">
+                        <div class="layui-card" style="min-height: 19.5em;">
+                            <div class="layui-card-header">
+                                <i class="fa-solid fa-user icon icon-blue"></i>我的账户
+                            </div>
+                            <div class="layui-card-body layui-col-space10" id="myaccount" style="min-height: 100px">
+                                {% if not account['isLogin'] %}
+                                    <br>
+                                    <p>您可以登录我们的博客，来更好地运行 Tab Toolbox。</p>
+                                    <p>也可以不进行登录，请前往用户中心设置您的本地账户。</p>
+                                    <br><br>
+                                    <p>
+                                        <a style="color: #00adff;" href="javascript:;" layuimini-content-href="/account"
+                                           data-title="账户">我不想登录</a> /
+                                        <a style="color: #00adff;" href="javascript:;"
+                                           layuimini-content-href="/account?login=1" data-title="账户">使用在线账户登录</a>
+                                    </p>
+                                {% else %}
+                                    <p style="text-align: center">
+                                        <img src="{{ account['avatar'] }}"
+                                             style="position: relative;width: 150px;vertical-align: middle;border-radius: 100%;border: solid 1px black;">
+                                    </p>
+                                    <h3 style="text-align: center;">用户名：{{ account['username'] }}</h3>
+                                    <h3 style="text-align: center;">昵称：{{ account['nickname'] }}</h3>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md6">
+                        <div class="layui-card" style="min-height: 19.5em;">
+                            <div class="layui-card-header"><i class="fa fa-credit-card icon icon-blue"></i>快捷入口
+                                <button onclick="quickstart()" type="button" style="margin-bottom: 0.3em;"
+                                        class="layui-btn layui-btn-xs layui-btn-normal">查看全部
+                                </button>
+                            </div>
+                            <div class="layui-card-body layui-col-space10" id="quickstart" style="min-height: 100px">
+                                <div class="welcome-module">
+                                    <div class="layui-row layui-col-space10 layuimini-qiuck">
+                                        {% for x in quickstart_icon %}
+                                        <div class="layui-col-xs3 layuimini-qiuck-module">
+                                            {% if x['mode'] == 0 %}
+                                                <a {% if x['href'] == "" %} {% else %} href="javascript:;"
+                                                                                       layuimini-content-href="{{ x['href'] }}" {% endif %}
+                                                                                       data-title="{{ x['title'] }}"
+                                                                                       data-icon="">
+                                            {% else %}
+                                                <a {% if x['href'] == "" %} {% else %} href="{{ x['href'] }}"
+                                                                                       data-title="{{ x['title'] }}"  {% endif %}
+                                                                                       data-icon="">
+                                            {% endif %}
+                                            {% autoescape false %}
+                                            {{ x['icon'] }}
+                                            {% endautoescape %}
+                                            <cite>{{ x['title'] }}</cite>
+                                            </a>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header">
+                                <i class="fa-solid fa-note-sticky icon icon-origin"></i>近期日志
+                            </div>
+                            <div class="layui-card-body"
+                                 style="background-color: #000000; overflow: auto; position: relative;">
+                                {% for log in latest_logs %}
+                                    <p style="color:{{ {
+                                            "Plain": "#ffffff",
+                                            "Log": "#1E90FF",
+                                            "Info": "#b0b6e3",
+                                            "Debug": "#800080",
+                                            "Success": "#228b22",
+                                            "Warning": "#FF8000",
+                                            "Error": "#ff0000"
+                                            }.get(log[1], "#ffffff") }}">
+                                        {{ "[" + log[0] + "]" + "(" + log[1] + ") " + log[2] }}
+                                    </p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                    {% autoescape false %}
+                    {% for dashboard_div in dashboard_div_dict.keys() %}
+                        {{ dashboard_div_dict[dashboard_div] }}
+                    {% endfor %}
+                    {% endautoescape %}
+                </div>
+
+            </div>
+            <div class="layui-col-md4">
+                <div class="layui-card">
+                    <div class="layui-card-header"><i class="fa fa-bullhorn icon icon-tip"></i>系统公告</div>
+                    <div class="layui-card-body layui-text">
+                        {% autoescape false %}
+                        {% for key in notice_data.keys() %}
+                            <div class="layuimini-notice">
+                                <div class="layuimini-notice-title">{{ notice_data[key]['title'] }}</div>
+                                <div class="layuimini-notice-extra">{{ notice_data[key]['time'] }}</div>
+                                <div class="layuimini-notice-content layui-hide">
+                                    {{ notice_data[key]['content'] }}
+                                </div>
+                            </div>
+                        {% endfor %}
+                        {% endautoescape %}
+                    </div>
+                </div>
+                <div class="layui-card">
+                    <div class="layui-card-header"><i class="fa fa-fire icon-tip icon"></i>Tab Toolbox for Website 版本信息
+                    </div>
+                    <div class="layui-card-body layui-text">
+                        <table class="layui-table">
+                            <colgroup>
+                                <col width="100">
+                                <col>
+                            </colgroup>
+                            <tbody>
+                            <tr>
+                                <td>版本号</td>
+                                <td>
+                                    {{ TAB_TOOLBOX_VERSION }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>制作谢明</td>
+                                <td><a href="javascript:;" layuimini-content-href="/about" data-title="关于">点击查看</a></td>
+                            </tr>
+                            <tr>
+                                <td>开源支持</td>
+                                <td>layui / <a href="http://layuimini.99php.cn/iframe/v2/index.html" target="_blank">layuimini</a><br>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>开发工具</td>
+                                <td>Python(flask) Pycharm</td>
+                            </tr>
+                            <tr>
+                                <td>开源地址</td>
+                                <td>
+                                    Gitee：<a href="https://gitee.com/wojiaoyishang/tab-toolbox-for-website"
+                                             target="_blank">点击进入</a>
+                                    Github：<a href="https://github.com/wojiaoyishang/tab-toolbox-for-website"
+                                              target="_blank">点击进入</a>
+                                </td>
+                            </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="layui-card">
+                    <div class="layui-card-header"><i class="fa-solid fa-heart icon-tip icon"></i>作者心语</div>
+                    <div class="layui-card-body layui-text layadmin-text">
+                        <p>不管怎么说，首先非常感谢您能打开或者使用此软件。Tab Toolbox for Website 在编写的过程中其实遇到了更多技术问题。</p>
+                        <p>尽管有些问题真的非常让我头痛，但是我还是没有放弃编写。我享受写代码解决问题的过程，这很有趣。</p>
+                        <p>您可以查看我们的开源仓库和wiki来开发此程序。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    layui.use(['layer', 'miniTab'], function () {
+        let $ = layui.jquery,
+            miniTab = layui.miniTab
+
+        miniTab.listen();
+
+        /**
+         * 查看公告信息
+         **/
+        $('body').on('click', '.layuimini-notice', function () {
+            let title = $(this).children('.layuimini-notice-title').text(),
+                noticeTime = $(this).children('.layuimini-notice-extra').text(),
+                content = $(this).children('.layuimini-notice-content').html();
+            let html = '<div style="padding:15px 20px; text-align:justify; line-height: 22px;border-bottom:1px solid #e2e2e2;background-color: #2f4056;color: #ffffff">\n' +
+                '<div style="text-align: center;margin-bottom: 20px;font-weight: bold;border-bottom:1px solid #718fb5;padding-bottom: 5px"><h4 class="text-danger">' + title + '</h4></div>\n' +
+                '<div style="font-size: 12px">' + content + '</div>\n' +
+                '</div>\n';
+            parent.layer.open({
+                type: 1,
+                title: '系统公告' + '<span style="float: right;right: 1px;font-size: 12px;color: #b1b3b9;margin-top: 1px">' + noticeTime + '</span>',
+                area: '300px;',
+                shade: 0.8,
+                id: 'layuimini-notice',
+                btn: ['好的'],
+                btnAlign: 'c',
+                moveType: 1,
+                content: html,
+                success: function (layero) {
+                }
+            });
+        });
+    });
+
+
+    function quickstart() {
+        layui.use(['form', 'miniTab'], function () {
+            let miniTab = layui.miniTab;
+            // 打开新的窗口
+            miniTab.openNewTabByIframe({
+                href: "quickstart",
+                title: "快速开始",
+            });
+
+        });
+    }
+</script>
+{% endblock %}

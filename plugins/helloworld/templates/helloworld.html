@@ -1,0 +1,127 @@
+{% extends "core-template.html" %} {# 这里引用了我们的模板文件，默认设置了一些 css 与 导入了 layui 的 JavaScript 脚本 #}
+
+{# 修改模板的 title 位置 其它位置请查看文件 core-template.html #}
+{% block title %}
+    <title>Hello World</title>
+{% endblock %}
+
+{% block body %}
+    <!-- 从基本元素开始写起 -->
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <div class="layui-row layui-col-space15">
+
+                <div class="layui-col-md12">
+
+                    <!-- 卡片1 -->
+                    <div class="layui-card">
+                        <div class="layui-card-header">
+                            <i class="fa-solid fa-house-user icon icon-tip"></i>卡片示例
+                        </div>
+                        <div class="layui-card-body layui-col-space10">
+                            你好！这是一个卡片示例！下面是代码：
+                            <pre class="layui-code" lay-options="{title:'HTML', height: '320px'}">
+<div class="layui-card">
+    <div class="layui-card-header">
+        <i class="fa-solid fa-house-user icon icon-tip"></i>卡片示例
+    </div>
+    <div class="layui-card-body layui-col-space10">
+        你好！这是一个卡片示例！
+    </div>
+</div>
+                            </pre>
+                        </div>
+                    </div>
+                    <!-- 卡片2 -->
+                    <div class="layui-card">
+                        <div class="layui-card-header">
+                            <i class="fa-solid fa-folder icon"></i>filemanager 文件选择器测试
+                        </div>
+                        <div class="layui-card-body layui-col-space10">
+                            <button type="button" class="layui-btn layui-btn-primary layui-border-blue"
+                                    onclick="filemanager_test_1()">
+                                点击我可以调出文件选择器（多选）
+                            </button>
+                            <button type="button" class="layui-btn layui-btn-primary layui-border-blue"
+                                    onclick="filemanager_test_2()">
+                                点击我可以调出文件选择器（单选）
+                            </button>
+                        </div>
+                    </div>
+
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- 这里可以引入JavaScript脚本 -->
+    <script>
+        layui.use('code', function () {
+            layui.code(
+                {
+                    skin: "dark",
+                    encode: true
+                }
+            );
+        });
+
+        // 这里开始自定义功能
+        // 打开 filemanager 多文件选择
+        function filemanager_test_1() {
+            layui.use('layer', function () {
+                let layer = layui.layer;
+                layer.open({
+                    type: 2,
+                    title: '多文件选择测试',
+                    content: '/filemanager?disable_double=yes',
+                    btn: ["确定", "取消"],
+                    area: ['100%', '80%'],
+                    btn1: function (index, layero) {
+                        let iframeWin = window[layero.find('iframe')[0]['name']];
+                        let path = iframeWin.filemanager_path // 文件路径
+                        let checkStatus = iframeWin.filemanager_checkStatus // 所有数据
+
+                        // layui官方 给出的示例
+                        console.log(checkStatus.data) //获取选中行的数据
+                        console.log(checkStatus.data.length) //获取选中行数量，可作为是否有选中行的条件
+                        console.log(checkStatus.isAll) //表格是否全选
+
+                        checkStatus.data.forEach(function (currentValue, index, arr) {
+                            checkStatus.data[index].thumbHTML = checkStatus.data[index].thumbHTML.replace("<", "&lt;").replace(">", "&lt;")
+                        })
+
+
+                        layer.alert('文件路径:' + path + "<br>" + "文件选择项目JSON:" + JSON.stringify(checkStatus.data));
+                    },
+                    btn2: function (index, layero) {
+                        layer.alert("未选择")
+                    }
+                });
+            })
+        }
+
+        // 打开 filemanager 单文件选择
+        function filemanager_test_2() {
+            layui.use('layer', function () {
+                let layer = layui.layer;
+                layer.open({
+                    type: 2,
+                    title: '单文件选择测试',
+                    content: '/filemanager?checkedOnly=yes&disable_double=yes',  // 注意设置单选
+                    btn: ["确定", "取消"],
+                    area: ['100%', '80%'],
+                    btn1: function (index, layero) {
+                        let iframeWin = window[layero.find('iframe')[0]['name']];
+                        let path = iframeWin.filemanager_path // 文件路径
+                        let checkedOnly_data = iframeWin.filemanager_checkedOnly_data
+                        layer.alert('文件路径:' + path + "<br>" + "文件选择项目JSON:" + JSON.stringify(checkedOnly_data).replace("<", "&lt;").replace(">", "&lt;"));
+                    },
+                    btn2: function (index, layero) {
+                        layer.alert("未选择")
+                    }
+                });
+            })
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{
+  "PLUGIN_NAME": "Hello World",
+  "PLUGIN_DESCRIPTION": "A plugin which the first form Tab Toolbox for Website for test.",
+  "PLUGIN_VERSION": "0.0.0.1",
+  "PLUGIN_DEVELOPER": "Yishang",
+
+  "PLUGIN_WEBSITE": "https://lovepikachu.top",
+  "PLUGIN_EMAIL": "lovepikachu@qq.com",
+  "PLUGIN_COPYRIGHT": "COPYRIGHT FOR YISHANG"
+}
+
