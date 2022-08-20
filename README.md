@@ -92,9 +92,9 @@ lxml==4.5.2
 ```$ python main.py```
 
 
-## 使用文档
+## 开发文档
 
-[**最新文档**](https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document)
+[**https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document**](https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document)
 
 ## 主页图片
 
