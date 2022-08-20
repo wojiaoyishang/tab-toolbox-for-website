@@ -69,4 +69,13 @@ lxml==4.5.2
 
 
 ## 使用文档
+
 [**最新文档**](https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document)
+
+## 主页图片
+
+<p align="center">
+  <a href="https://layui.github.io/">
+    <img src="https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document/_images/quickstart_1.png" width="100%">
+  </a>
+</p>
