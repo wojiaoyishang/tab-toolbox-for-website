@@ -1,0 +1,202 @@
+{% extends "core-template.html" %}
+
+{% block title %}
+    <title>插件管理</title>
+{% endblock %}
+
+{% block body %}
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+
+            <fieldset class="table-search-fieldset">
+                <legend>搜索信息</legend>
+                <div style="margin: 10px 10px 10px 10px">
+                    <form class="layui-form layui-form-pane" action="">
+                        <div class="layui-form-item">
+                            <div class="layui-inline">
+                                <label class="layui-form-label">插件名称</label>
+                                <div class="layui-input-inline">
+                                    <input type="text" name="pluginName" autocomplete="off" class="layui-input">
+                                </div>
+                            </div>
+                            <div class="layui-inline">
+                                <button type="submit" class="layui-btn layui-btn-primary" lay-submit
+                                        lay-filter="data-search-btn"><i class="layui-icon"></i> 搜 索
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </fieldset>
+
+            {#            <script type="text/html" id="toolbarDemo">#}
+            {#                <div class="layui-btn-container">#}
+            {#                    <button class="layui-btn layui-btn-normal layui-btn-sm data-add-btn" lay-event="add"> 添加</button>#}
+            {#                    <button class="layui-btn layui-btn-sm layui-btn-danger data-delete-btn" lay-event="delete"> 删除#}
+            {#                    </button>#}
+            {#                </div>#}
+            {#            </script>#}
+
+            <table class="layui-hide" id="pluginTable" lay-filter="currentTableFilter"></table>
+
+            <script type="text/html" id="currentTableBar">
+                <a class="layui-btn layui-btn-normal layui-btn-xs data-count-edit" lay-event="EnableOrDisable">禁/启用</a>
+                <a class="layui-btn layui-btn-xs layui-btn-danger data-count-delete" lay-event="delete">删除</a>
+            </script>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    {{ super() }}
+    <script src="/static/lib/layui/layui.js" charset="utf-8"></script>
+    <script>
+        layui.use(['form', 'table'], function () {
+            let $ = layui.jquery,
+                form = layui.form,
+                table = layui.table;
+
+            table.render({
+                elem: '#pluginTable',
+                url: '/api/plugin/get',
+                {#toolbar: '#toolbarDemo',#}
+                defaultToolbar: ['filter', 'exports', 'print'],
+                cols: [[
+                    {type: "checkbox", width: 50},
+                    {field: 'ENABLE', width: 60, title: '启用', align: 'center'},
+                    {field: 'PLUGIN_NAME', width: 150, title: '插件名称'},
+                    {field: 'PLUGIN_DESCRIPTION', width: 300, title: '插件介绍'},
+                    {field: 'PLUGIN_VERSION', width: 100, title: '版本'},
+                    {field: 'PLUGIN_DEVELOPER', width: 100, title: '开发者'},
+                    {field: 'PLUGIN_WEBSITE', width: 100, title: '官网'},
+                    {field: 'PLUGIN_EMAIL', width: 150, title: '联系邮箱'},
+                    {field: 'PLUGIN_COPYRIGHT', width: 150, title: '版权'},
+                    {title: '操作', minWidth: 150, toolbar: '#currentTableBar', align: "center"}
+                ]],
+                limits: [10, 15, 20, 25, 50, 100],
+                limit: 15,
+                page: true,
+                skin: 'line'
+            });
+
+            // 监听搜索操作
+            form.on('submit(data-search-btn)', function (data) {
+                var result = JSON.stringify(data.field);
+
+                //执行搜索重载
+                table.reload('pluginTable', {
+                    page: {
+                        curr: 1
+                    },
+                    where: {
+                        search_params: result
+                    }
+                }, 'data');
+
+                return false;
+            });
+
+            {#/**#}
+            {# * toolbar监听事件#}
+            {# */#}
+            {#table.on('toolbar(currentTableFilter)', function (obj) {#}
+            {##}
+            {#    if (obj.event === 'add') {  // 监听添加操作#}
+            {#        var index = layer.open({#}
+            {#            title: '添加用户',#}
+            {#            type: 2,#}
+            {#            shade: 0.2,#}
+            {#            maxmin: true,#}
+            {#            shadeClose: true,#}
+            {#            area: ['100%', '100%'],#}
+            {#            content: '../page/table/add.html',#}
+            {#        });#}
+            {#    } else if (obj.event === 'delete') {  // 监听删除操作#}
+            {#        var checkStatus = table.checkStatus('pluginTable')#}
+            {#            , data = checkStatus.data;#}
+            {#        layer.alert(JSON.stringify(data));#}
+            {#    }#}
+            {# }); #}
+            {##}
+            {#//监听表格复选框选择#}
+            {#table.on('checkbox(currentTableFilter)', function (obj) {#}
+            {#    console.log(obj)#}
+            {# }); #}
+
+            table.on('tool(currentTableFilter)', function (obj) {
+                var data = obj.data;
+                // 禁用或启用插件
+                if (obj.event === 'EnableOrDisable') {
+                    layer.confirm("这将会使 Tab Toolbox for Website 进行重载！<br>下面是插件的基本信息：<br>" +
+                        "插件名称：" + data['PLUGIN_NAME'] + " (v" + data['PLUGIN_VERSION'] + ")<br>" +
+                        "插件作者：" + data['PLUGIN_DEVELOPER'] + "<br>" +
+                        "插件介绍：" + data['PLUGIN_DESCRIPTION'], {title: '确定切换插件禁/启用状态吗？'},
+                        function (index) {
+                            layui.use(['jquery'], function () {
+                                var $ = layui.jquery;
+                                $.ajax({
+                                    url: "/api/plugin",
+                                    type: "post",
+                                    data: {target: 'EnableOrDisable', plugin: data['PLUGIN']},
+                                    dataType: "json"
+                                });
+
+                                layer.msg('等待服务器自动重启......', {time: -1});
+
+                                setInterval(function () {
+                                    $.ajax({
+                                        url: "/api/init",
+                                        type: "get",
+                                        success: function (data) {
+                                            parent.location.reload();
+                                        }
+                                    })
+                                }, 1000)
+
+
+                            })
+                            layer.close(index);
+                        });
+
+                    $(window).on("resize", function () {
+                        layer.full(index);
+                    });
+                    return false;
+                } else if (obj.event === 'delete') {
+
+                    layer.confirm("注意！您正在尝试删除插件！<br>下面是插件的基本信息：<br>" +
+                        "插件名称：" + data['PLUGIN_NAME'] + " (v" + data['PLUGIN_VERSION'] + ")<br>" +
+                        "插件作者：" + data['PLUGIN_DEVELOPER'] + "<br>" +
+                        "插件介绍：" + data['PLUGIN_DESCRIPTION'] + "<br>Tab Toolbox for Website 将会把插件禁用，然后删除插件文件目录。", function (index) {
+
+                        layer.msg('等待服务器删除插件并重启......', {time: -1});
+
+                        $.ajax({
+                            url: "/api/plugin",
+                            type: "post",
+                            data: {target: 'Delete', plugin: data['PLUGIN']},
+                            dataType: "json",
+                        });
+
+                        setInterval(function () {
+                            $.ajax({
+                                url: "/api/init",
+                                type: "get",
+                                success: function (data) {
+                                    parent.location.reload();
+                                }
+                            })
+                        }, 1000)
+
+                        layer.close(index);
+                    });
+                }
+            });
+
+        });
+
+    </script>
+
+{% endblock %}
+

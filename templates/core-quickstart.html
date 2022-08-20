@@ -1,0 +1,52 @@
+{% extends "core-template.html" %}
+
+{% block title %}
+    <title>快速开始</title>
+{% endblock %}
+
+
+{% block body %}
+<div class="layuimini-container">
+    <div class="layuimini-main">
+        <div class="layui-row">
+            <div class="layui-col-md12">
+                <div class="layui-card">
+                    <div class="layui-card-header"><i class="fa fa-credit-card icon icon-blue"></i>快捷入口
+                    </div>
+                    <div class="layui-card-body layui-col-space10" style="position: relative;overflow: auto; ">
+
+
+                        {% for key in quickstart_icon.keys() %}
+                        <div class="layui-col-xs1 layuimini-qiuck-module">
+                            {% if quickstart_icon[key]['mode'] == 0 %}
+                                <a {% if quickstart_icon[key]['href'] == "" %} {% else %} href="javascript:;"
+                                                                                          layuimini-content-href="{{ quickstart_icon[key]['href'] }}" {% endif %}
+                                                                                          data-title="{{ quickstart_icon[key]['title'] }}"
+                                                                                          data-icon="">
+                            {% else %}
+                                <a {% if quickstart_icon[key]['href'] == "" %} {% else %}
+                                    href="{{ quickstart_icon[key]['href'] }}"
+                                    data-title="{{ quickstart_icon[key]['title'] }}"  {% endif %}
+                                    data-icon="">
+                            {% endif %}
+                            {% autoescape false %}
+                            {{ quickstart_icon[key]['icon'] }}
+                            {% endautoescape %}
+                            <cite>{{ quickstart_icon[key]['title'] }}</cite>
+                            </a>
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    layui.use(['miniTab'], function () {
+        let miniTab = layui.miniTab
+        miniTab.listen();
+    });
+</script>
+{% endblock %}

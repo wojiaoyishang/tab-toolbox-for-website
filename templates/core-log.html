@@ -1,0 +1,119 @@
+{% extends "core-template.html" %}
+
+{% block title %}
+    <title>全部日志</title>
+{% endblock %}
+
+
+{% block body %}
+    <div class="layuimini-container">
+        <div class="layuimini-main">
+            <div class="layui-row">
+                <div class="layui-col-md12 layui-col-space15">
+                    <div class="layui-card">
+                        <div class="layui-card-header"><i class="fa fa-credit-card icon icon-blue"></i>控制区
+                        </div>
+
+                        <div class="layui-card-body"
+                             style="margin: 0 auto;position: relative !important;overflow: auto;vertical-align: middle;">
+                            <div class="layui-inline"><label class="layui-form-label">日期范围</label>
+                                <div class="layui-inline" id="date_choose">
+                                    <div class="layui-input-inline">
+                                        <input type="text" autocomplete="off" id="startDate" class="layui-input"
+                                               placeholder="开始日期">
+                                    </div>
+                                    <div class="layui-form-mid">
+                                        -
+                                    </div>
+                                    <div class="layui-input-inline">
+                                        <input type="text" autocomplete="off" id="endDate" class="layui-input"
+                                               placeholder="结束日期">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="layui-card">
+                        <div class="layui-card-header">
+                            <i class="fa-solid fa-note-sticky icon icon-origin"></i>近期日志
+                        </div>
+                        <div class="layui-card-body"
+                             style="background-color: #000000; overflow: auto; position: relative;">
+                            {% for log in latest_logs %}
+                                <p style="color:{{ {
+                                            "Plain": "#ffffff",
+                                            "Log": "#1E90FF",
+                                            "Info": "#b0b6e3",
+                                            "Debug": "#800080",
+                                            "Success": "#228b22",
+                                            "Warning": "#FF8000",
+                                            "Error": "#ff0000"
+                                            }.get(log[1], "#ffffff") }}">
+                                    {{ "[" + log[0] + "]" + "(" + log[1] + ") " + log[2] }}
+                                </p>
+
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function getUrlParam(name) {
+            // 获取URL参数
+            let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+            let r = window.location.search.substr(1).match(reg);
+            if (r != null) {
+                return decodeURI(r[2]);
+            }
+            return null;
+        }
+
+        function formatDate(str) {
+            // 自动在日期补 0 函数
+            return str
+                .split("-")
+                .map((item) => {
+                    if (+item < 10) {
+                        return "0" + +item;
+                    }
+                    return item;
+                })
+                .join("-");
+        }
+
+        function times(value) {
+            // 获取时间
+            let date = new Date(parseInt(value))
+            let tt = [date.getFullYear(), date.getMonth() + 1, date.getDate()].join('-');
+            return tt;
+        }
+
+        layui.use('laydate', function () {
+            let laydate = layui.laydate;
+            //日期范围
+            if (getUrlParam("start") == null) {
+                let Today = new Date();
+                document.querySelector("#startDate").value = formatDate(Today.getFullYear().toString() + "-" + Today.getMonth().toString() + "-" + Today.getDate().toString())
+                document.querySelector("#endDate").value = formatDate(Today.getFullYear().toString() + "-" + (Today.getMonth() + 1).toString() + "-" + Today.getDate().toString())
+            } else {
+                document.querySelector("#startDate").value = formatDate(times(getUrlParam("start")))
+                document.querySelector("#endDate").value = formatDate(times(getUrlParam("end")))
+            }
+            laydate.render({
+                elem: '#date_choose',
+                range: ["#startDate", "#endDate"],
+                isInitValue: false,
+                done: function (value, date, endDate) {
+                    let start = date.year + "-" + date.month + "-" + date.date
+                    let end = endDate.year + "-" + endDate.month + "-" + endDate.date
+                    window.location.href = "/log?start=" + Date.parse(start + " 00:00:00").toString()
+                        + "&end=" + Date.parse(end + " 00:00:00").toString()
+                }
+            });
+        })
+    </script>
+{% endblock %}
