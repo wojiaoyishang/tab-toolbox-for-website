@@ -88,7 +88,7 @@ init_api = {
 }
 
 # 快捷入口设置
-quickstart_icon = {}
+shortcut_icon = {}
 
 # 公告设置
 notice_data = {}
@@ -103,7 +103,7 @@ ui.menu_register("程序首页")
 ui.menu_register("程序首页/仪表盘", "fa-solid fa-house", "/dashboard")
 ui.menu_register("程序首页/插件", "fa-brands fa-atlassian")
 ui.menu_register("程序首页/插件/管理插件", "fa-solid fa-list", "/plugin/list")
-ui.menu_register("程序首页/快捷入口", "fa-solid fa-rocket", "/quickstart")
+ui.menu_register("程序首页/快捷入口", "fa-solid fa-rocket", "/shortcut")
 ui.menu_register("程序首页/文件管理 ", "fa-solid fa-folder", "/filemanager")
 ui.menu_register("程序首页/日志查看", "fa-solid fa-newspaper", "/log")
 ui.menu_register("程序首页/程序设置", "fa-solid fa-circle-user", "/setting")

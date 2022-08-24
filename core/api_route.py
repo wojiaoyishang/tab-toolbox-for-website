@@ -412,51 +412,7 @@ def filemanager_target():
             if target not in filemanager_allow_target[p]:
                 raise BaseException("不允许执行的方法！")
 
-        if target == "function" and request.method == "POST":  # 特殊功能调用
-            _log("查询了磁盘", "module:", module, "target:", target, "path:", path, "data:", data)
-            abs_path, files = app.filemanager_module[module].function(path, data)
-            return {
-                "code": 0,
-                "path": abs_path,
-                "count": len(files),
-                "data": files
-            }
-        elif target == "list_path" and request.method == "POST":  # 列目录
-            _log("查询了目录", "module:", module, "target:", target, "path:", path, "data:", data)
-            abs_path, files = app.filemanager_module[module].list_path(path, data)
-            return {
-                "code": 0,
-                "path": abs_path,
-                "count": len(files),
-                "data": files
-            }
-        elif target == "download_file":
-            _log("请求下载文件", "module:", module, "target:", target, "path:", path, "data:", data)
-            return app.filemanager_module[module].download_file(path, data)
-        elif target == "delete_file":
-            _log("请求删除文件", "module:", module, "target:", target, "path:", path, "data:", data)
-            if app.filemanager_module[module].delete_file(path, data):
-                return {
-                    "code": 0,
-                    "msg": "删除文件成功！"
-                }
-            return {
-                "code": -1,
-                "msg": "删除文件失败！"
-            }
-        elif target == "upload_file":
-            _log("上传了文件", "module:", module, "target:", target, "path:", path, "data:", data)
-            src = app.filemanager_module[module].upload_file(path, data)
-            return {
-                "code": 0,
-                "msg": "成功",
-                "data": {
-                    "src": src
-                }
-            }
-        else:
-            _log("请求其它文件函数", "module:", module, "target:", target, "path:", path, "data:", data)
-            return getattr(app.filemanager_module[module], target)(path, data)
+        return getattr(app.filemanager_module[module], target)(path, data)
     except AttributeError as e:
         return {
             "code": -1,

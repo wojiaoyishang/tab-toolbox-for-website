@@ -62,16 +62,6 @@
         </div>
     </div>
     <script>
-        function getUrlParam(name) {
-            // 获取URL参数
-            let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-            let r = window.location.search.substr(1).match(reg);
-            if (r != null) {
-                return decodeURI(r[2]);
-            }
-            return null;
-        }
-
         function formatDate(str) {
             // 自动在日期补 0 函数
             return str

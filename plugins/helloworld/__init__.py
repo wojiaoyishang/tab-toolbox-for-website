@@ -30,7 +30,7 @@ ui.menu_register("Hello World")
 ui.menu_register("Hello World/示例", "fa-solid fa-code", "/helloworld")
 
 # 注册快捷按钮
-ui.set_quickstart_icon("helloworld", "你好世界", "fa-solid fa-earth-africa", "/helloworld", 0)
+ui.set_shortcut_icon("helloworld", "你好世界", "fa-solid fa-earth-africa", "/helloworld", 0)
 
 # 添加一则公告
 ui.set_notice("helloworld", "来自 Hello World 插件的公告",

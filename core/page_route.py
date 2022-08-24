@@ -23,13 +23,13 @@ def dashboard_page():
         log[1] = application.log_level2name(int(log[1]))
         log[0] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(log[0] / 1000000000))
 
-    quickstart = list(app.quickstart_icon.values())[:8]
-    while len(quickstart) < 8:
-        quickstart.append({"title": "未添加", "icon": "<i class='fa-solid fa-ban'></i>", "mode": 0, "href": ""})
+    shortcut = list(app.shortcut_icon.values())[:8]
+    while len(shortcut) < 8:
+        shortcut.append({"title": "未添加", "icon": "<i class='fa-solid fa-ban'></i>", "mode": 0, "href": ""})
 
     return render_template('core-dashboard.html',
                            **ui.get_website_setting(),
-                           quickstart_icon=quickstart,
+                           shortcut_icon=shortcut,
                            notice_data=app.notice_data,
                            TAB_TOOLBOX_VERSION=app.TAB_TOOLBOX_VERSION,
                            dashboard_div_dict=app.dashboard_div_dict,
@@ -53,9 +53,9 @@ def setting_page():
                            host=app.HOST, port=app.PORT, development=app.DEVELOPMENT, debug=app.DEBUG)
 
 
-@blueprint.route('/quickstart')
-def quickstart_page():
-    return render_template('core-quickstart.html', **ui.get_website_setting(), quickstart_icon=app.quickstart_icon)
+@blueprint.route('/shortcut')
+def shortcut_page():
+    return render_template('core-shortcut.html', **ui.get_website_setting(), shortcut_icon=app.shortcut_icon)
 
 
 @blueprint.route('/log')
@@ -74,7 +74,7 @@ def log_page():
         log[1] = application.log_level2name(int(log[1]))
         log[0] = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(log[0] / 1000000000))
 
-    return render_template('core-log.html', **ui.get_website_setting(), quickstart_icon=app.quickstart_icon,
+    return render_template('core-log.html', **ui.get_website_setting(), shortcut_icon=app.shortcut_icon,
                            latest_logs=logs)
 
 

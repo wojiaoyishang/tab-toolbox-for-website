@@ -5,7 +5,6 @@ By: Yishang & Pikachu
 
 mod_systemfile.py -- 文件管理的模块之一
 
-已经预先定义的方法 list_path download_file function upload_file 必需要有固定格式
 其余将会调用提供 target 的字符串对应的函数，并传入参数 path(以分隔符结尾) 和 data，
 直接返回函数所返回的值 可以看 core.api_route.filemanager_target() 中的定义。
 """
@@ -58,6 +57,7 @@ def function(path: str, data=None):
         ...
     ]
     """
+
     if data == "show_disk":  # 获取磁盘
         disk = []
         for d in psutil.disk_partitions():
@@ -70,17 +70,27 @@ def function(path: str, data=None):
                 "typename": "-",
                 "size": "-"
             })
-        return "function::show_disk", disk
+        return {
+            "code": 0,
+            "path": "function::show_disk",
+            "count": 1,
+            "data": disk
+        }
     elif data == "pikachu":
-        return "皮卡丘在我心里 φ(>ω<*) ", [{
-            "thumb": "/static/images/icon/pikachu.png",
-            "filename": "皮卡丘最可爱",
-            "created": "皮卡丘爱你",
-            "modified": "以赏最爱小皮卡",
-            "type": "PIKACHU",
-            "typename": "IS MY GOD",
-            "size": "可爱可爱！"
-        }]
+        return {
+            "code": 0,
+            "path": "皮卡丘在我心里 φ(>ω<*) ",
+            "count": 1,
+            "data": [{
+                "thumb": "/static/images/icon/pikachu.png",
+                "filename": "皮卡丘最可爱",
+                "created": "皮卡丘爱你",
+                "modified": "以赏最爱小皮卡",
+                "type": "PIKACHU",
+                "typename": "IS MY GOD",
+                "size": "可爱可爱！"
+            }]
+        }
     else:
         raise BaseException(f"不存在功能 {path} ！")
 
@@ -137,7 +147,12 @@ def list_path(path: str, data=None):
             "size": _byte2string(os.path.getsize(full_path))
         })
 
-    return abs_path.replace("\\", "/"), files
+    return {
+        "code": 0,
+        "path": abs_path.replace("\\", "/"),
+        "count": len(files),
+        "data": files
+    }
 
 
 def download_file(path: str, data=None):
@@ -199,7 +214,8 @@ def delete_file(path: str, data=None):
     else:
         if os.path.exists(path + data):
             os.remove(path + data)
-            return os.path.exists(path + data) == False
+            return {"code": 0, "msg": "删除文件成功！"} if not os.path.exists(path + data) else {"code": -1,
+                                                                                                "msg": "删除文件失败！"}
         else:
             raise BaseException("文件不存在！")
 
@@ -216,7 +232,16 @@ def upload_file(path: str, data=None):
     path = path + "/" if path[-1] not in ("/", "\\") else path  # 如果结尾不是 "/" 就加一个 "/"
     f = request.files['data']
     f.save(path + f.filename)
-    return path + f.filename
+    if os.path.exists(path + f.filename):
+        return {
+            "code": 0,
+            "msg": "上传文件成功",
+            "data": {
+                "src": path + f.filename
+            }
+        }
+    else:
+        raise BaseException("上传文件失败")
 
 
 def create_folder(path: str, data=None):
@@ -263,7 +288,9 @@ def rename(path: str, data=None):
     :param data: 列表 [原文件（夹）名, 重命名文件（夹）名]
     :return: 返回数据
     """
-    if not application.islogin() and (re.compile(r"""/|\\|:|\*|"|<|>|\||\?""").search(data[0]) is not None or re.compile(r"""/|\\|:|\*|"|<|>|\||\?""").search(data[1])):
+    if not application.islogin() and (
+            re.compile(r"""/|\\|:|\*|"|<|>|\||\?""").search(data[0]) is not None or re.compile(
+        r"""/|\\|:|\*|"|<|>|\||\?""").search(data[1])):
         return {
             "code": -1,
             "msg": '非管理员不允许使用非法字符 / \ : * " < > | ?'

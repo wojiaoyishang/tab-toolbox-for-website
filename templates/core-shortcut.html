@@ -16,23 +16,23 @@
                     <div class="layui-card-body layui-col-space10" style="position: relative;overflow: auto; ">
 
 
-                        {% for key in quickstart_icon.keys() %}
+                        {% for key in shortcut_icon.keys() %}
                         <div class="layui-col-xs1 layuimini-qiuck-module">
-                            {% if quickstart_icon[key]['mode'] == 0 %}
-                                <a {% if quickstart_icon[key]['href'] == "" %} {% else %} href="javascript:;"
-                                                                                          layuimini-content-href="{{ quickstart_icon[key]['href'] }}" {% endif %}
-                                                                                          data-title="{{ quickstart_icon[key]['title'] }}"
+                            {% if shortcut_icon[key]['mode'] == 0 %}
+                                <a {% if shortcut_icon[key]['href'] == "" %} {% else %} href="javascript:;"
+                                                                                          layuimini-content-href="{{ shortcut_icon[key]['href'] }}" {% endif %}
+                                                                                          data-title="{{ shortcut_icon[key]['title'] }}"
                                                                                           data-icon="">
                             {% else %}
-                                <a {% if quickstart_icon[key]['href'] == "" %} {% else %}
-                                    href="{{ quickstart_icon[key]['href'] }}"
-                                    data-title="{{ quickstart_icon[key]['title'] }}"  {% endif %}
+                                <a {% if shortcut_icon[key]['href'] == "" %} {% else %}
+                                    href="{{ shortcut_icon[key]['href'] }}"
+                                    data-title="{{ shortcut_icon[key]['title'] }}"  {% endif %}
                                     data-icon="">
                             {% endif %}
                             {% autoescape false %}
-                            {{ quickstart_icon[key]['icon'] }}
+                            {{ shortcut_icon[key]['icon'] }}
                             {% endautoescape %}
-                            <cite>{{ quickstart_icon[key]['title'] }}</cite>
+                            <cite>{{ shortcut_icon[key]['title'] }}</cite>
                             </a>
                         </div>
                         {% endfor %}

@@ -47,25 +47,6 @@
             filemanager_disable_double -- 禁用双击文件操作 传入 yes
          */
 
-        function getUrlParam(name) {
-            // 获取URL参数
-            let reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
-            let r = window.location.search.substr(1).match(reg);
-            if (r != null) {
-                return decodeURI(r[2]);
-            }
-            return null;
-        }
-
-        // 返回字符串第 n 个出现的位置
-        function string_find(str, cha, num) {
-            var x = str.indexOf(cha);
-            for (var i = 0; i < num; i++) {
-                x = str.indexOf(cha, x + 1);
-            }
-            return x;
-        }
-
 
         filemanager_path = getUrlParam("path");  // 文件管理器查询路径
         filemanager_module = getUrlParam("module");  // 文件管理器查询的模块
@@ -121,7 +102,7 @@
         }
 
         // 公开方法 异步请求
-        function ajax_request(url, data) {
+        function filemanagaer_ajax_request(url, data) {
             layui.use(['jquery', 'toast'], function () {
                 let $ = layui.jquery,
                     layer = layui.layer,
@@ -138,7 +119,7 @@
                             toast.success({title: '成功', message: data['msg'], position: 'topCenter'});
                             filemanager_request(filemanager_path)
                         } else {
-                            toast.error({title: '失败', message: data['msg'], position: 'topCenter'});
+                            toast.error({title: '失败', message: data['msg'] + "（错误代码：" + data['code'].toString() + "）", position: 'topCenter'});
                         }
                     },
                     error: function (data) {
@@ -231,7 +212,7 @@
                             switch (obj.id) {
                                 case 'create_folder':
                                     layer.prompt({title: "输入新文件夹名"}, function (value, index, elem) {
-                                        ajax_request("/api/filemanager", {
+                                        filemanagaer_ajax_request("/api/filemanager", {
                                             module: filemanager_module,
                                             path: JSON.stringify(filemanager_path),
                                             target: 'create_folder',
@@ -256,7 +237,7 @@
                                         break
                                     }
                                     layer.prompt({title: "输入新的名称"}, function (value, index, elem) {
-                                        ajax_request("/api/filemanager", {
+                                        filemanagaer_ajax_request("/api/filemanager", {
                                             module: filemanager_module,
                                             path: JSON.stringify(filemanager_path),
                                             target: 'rename',
@@ -271,7 +252,7 @@
                                         break
                                     }
                                     layer.confirm("确定删除吗？", function () {
-                                        ajax_request("/api/filemanager", {
+                                        filemanagaer_ajax_request("/api/filemanager", {
                                             module: filemanager_module,
                                             path: JSON.stringify(filemanager_path),
                                             target: 'delete_file',
@@ -409,7 +390,7 @@
                                 },
                                 btn2: function (index, layero) {
                                     layer.confirm("确定删除吗？", function () {
-                                        ajax_request("/api/filemanager", {
+                                        filemanagaer_ajax_request("/api/filemanager", {
                                             module: filemanager_module,
                                             path: JSON.stringify(filemanager_path),
                                             target: 'delete_file',

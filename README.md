@@ -102,6 +102,6 @@ lxml==4.5.2
 
 <p align="center">
   <a href="https://layui.github.io/">
-    <img src="https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document/_images/quickstart_1.png" width="100%">
+    <img src="https://wojiaoyishang.gitee.io/tab-toolbox-for-website-document/_images/shortcut_1.png" width="100%">
   </a>
 </p>

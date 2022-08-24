@@ -42,14 +42,14 @@
                     <div class="layui-col-md6">
                         <div class="layui-card" style="min-height: 19.5em;">
                             <div class="layui-card-header"><i class="fa fa-credit-card icon icon-blue"></i>快捷入口
-                                <button onclick="quickstart()" type="button" style="margin-bottom: 0.3em;"
+                                <button onclick="shortcut()" type="button" style="margin-bottom: 0.3em;"
                                         class="layui-btn layui-btn-xs layui-btn-normal">查看全部
                                 </button>
                             </div>
-                            <div class="layui-card-body layui-col-space10" id="quickstart" style="min-height: 100px">
+                            <div class="layui-card-body layui-col-space10" id="shortcut" style="min-height: 100px">
                                 <div class="welcome-module">
                                     <div class="layui-row layui-col-space10 layuimini-qiuck">
-                                        {% for x in quickstart_icon %}
+                                        {% for x in shortcut_icon %}
                                         <div class="layui-col-xs3 layuimini-qiuck-module">
                                             {% if x['mode'] == 0 %}
                                                 <a {% if x['href'] == "" %} {% else %} href="javascript:;"
@@ -213,12 +213,12 @@
     });
 
 
-    function quickstart() {
+    function shortcut() {
         layui.use(['form', 'miniTab'], function () {
             let miniTab = layui.miniTab;
             // 打开新的窗口
             miniTab.openNewTabByIframe({
-                href: "quickstart",
+                href: "shortcut",
                 title: "快速开始",
             });
 

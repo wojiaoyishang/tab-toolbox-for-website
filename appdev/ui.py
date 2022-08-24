@@ -89,7 +89,7 @@ def get_website_setting() -> dict:
     return app.website_setting
 
 
-def set_quickstart_icon(symbol: str, title: str, icon: str, href: str, mode=0):
+def set_shortcut_icon(symbol: str, title: str, icon: str, href: str, mode=0):
     """
     添加库快捷功能按钮，就是首页上的快捷入口（首页默认为前8个）
 
@@ -99,17 +99,28 @@ def set_quickstart_icon(symbol: str, title: str, icon: str, href: str, mode=0):
     :param href: 按钮打开链接
     :param mode: 打开方式 0--框架标签页打开  1--框架标签页本页切换
     """
-    if symbol not in app.quickstart_icon:
-        app.quickstart_icon[symbol] = {}
-    app.quickstart_icon[symbol]['title'] = title
+    if symbol not in app.shortcut_icon:
+        app.shortcut_icon[symbol] = {}
+    app.shortcut_icon[symbol]['title'] = title
     if icon[:4] == "<svg":
-        app.quickstart_icon[symbol]['icon'] = icon
+        app.shortcut_icon[symbol]['icon'] = icon
     else:
-        app.quickstart_icon[symbol]['icon'] = f"<i class='{icon}'></i>"
+        app.shortcut_icon[symbol]['icon'] = f"<i class='{icon}'></i>"
 
-    app.quickstart_icon[symbol]['href'] = href
-    app.quickstart_icon[symbol]['mode'] = mode
+    app.shortcut_icon[symbol]['href'] = href
+    app.shortcut_icon[symbol]['mode'] = mode
 
+
+def set_quickstart_icon(*args):
+    return set_shortcut_icon(*args)
+
+def get_quickstart_icon_info():
+    """
+    获取全部快速开始的按钮信息
+
+    :return: dict 原数据
+    """
+    return app.shortcut_icon
 
 def set_notice(symbol: str, title: str, content: str, time_: str = None):
     """
