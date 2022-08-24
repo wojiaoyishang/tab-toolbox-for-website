@@ -112,7 +112,12 @@ def set_shortcut_icon(symbol: str, title: str, icon: str, href: str, mode=0):
 
 
 def set_quickstart_icon(*args):
+    """
+    兼容 1.5.2.0 以前的版本
+    参见 get_quickstart_icon() 函数
+    """
     return set_shortcut_icon(*args)
+
 
 def get_quickstart_icon_info():
     """
@@ -121,6 +126,7 @@ def get_quickstart_icon_info():
     :return: dict 原数据
     """
     return app.shortcut_icon
+
 
 def set_notice(symbol: str, title: str, content: str, time_: str = None):
     """

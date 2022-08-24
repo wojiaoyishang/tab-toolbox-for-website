@@ -7,4 +7,4 @@ PORT = 99  # 运行端口
 FIRST_RUNNING = True  # 是否第一次运行
 
 
-TAB_TOOLBOX_VERSION = "1.5.0.0" 
+TAB_TOOLBOX_VERSION = "1.5.2.0"
