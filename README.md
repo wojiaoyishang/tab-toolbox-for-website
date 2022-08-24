@@ -10,8 +10,6 @@
 
 ---
 
-## 这是一个测试分支，请不要下载这个分支的内容！这个分支处于开发阶段！
-
 Tab Toolbox for Website 基于 Python 构建，采用了 layuimini 的管理后台模板，提供更加方便的代码设计。并将 layuimini 的代码进行更改，采用最新的 layui 前端UI框架进行设计。
 
 Tab Toolbox for Website 最开始是 Windows 平台 中的 Tab 工具箱 一个程序，
