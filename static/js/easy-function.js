@@ -28,7 +28,7 @@ function string_find(str, cha, num) {
 }
 
 /**
- * @description: 异步 POST 请求并弹出提示
+ * @description: 异步 POST 请求并弹出提示 （json 数据格式）
  * @param url 目标url
  * @param data 数据
  * @param success_callback 成功回调，可为不填
@@ -72,7 +72,7 @@ function ajax_post_request(url, data, success_callback = function (data) {
 }
 
 /**
- * @description: 异步 GET 请求并弹出提示
+ * @description: 异步 GET 请求并弹出提示 （json 数据格式）
  * @param url 目标url
  * @param data 数据
  * @param success_callback 成功回调，可为不填
