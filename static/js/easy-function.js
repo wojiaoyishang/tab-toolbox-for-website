@@ -36,9 +36,9 @@ function string_find(str, cha, num) {
  * @param default_action 是否展示自带学校（如果是规定格式的相应，默认为 true）
  * @return 返回有返回对应项，无返回空
  */
-function ajax_post_request(url, data, success_callback = function (data) {
+function ajax_post_request(url, data, {success_callback = function (data) {
 }, error_callback = function (data) {
-}, default_action = true) {
+}, default_action = true} = {}) {
     layui.use(['jquery', 'toast'], function () {
         let $ = layui.jquery,
             toast = layui.toast;
@@ -80,9 +80,9 @@ function ajax_post_request(url, data, success_callback = function (data) {
  * @param default_action 是否展示自带学校（如果是规定格式的相应，默认为 true）
  * @return 返回有返回对应项，无返回空
  */
-function ajax_get_request(url, data, success_callback = function (data) {
+function ajax_get_request(url, data, {success_callback = function (data) {
 }, error_callback = function (data) {
-}, default_action = true) {
+}, default_action = true} = {}) {
     layui.use(['jquery', 'toast'], function () {
         let $ = layui.jquery,
             toast = layui.toast;
