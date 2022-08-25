@@ -33,34 +33,38 @@ function string_find(str, cha, num) {
  * @param data 数据
  * @param success_callback 成功回调，可为不填
  * @param error_callback 失败回调，可为不填
+ * @param default_action 是否展示自带学校（如果是规定格式的相应，默认为 true）
  * @return 返回有返回对应项，无返回空
  */
 function ajax_post_request(url, data, success_callback = function (data) {
-    layui.use(['toast'], function () {
-        let toast = layui.toast;
-        if (data['code'] === 0) {
-            toast.success({title: '成功', message: data['msg'], position: 'topCenter'});
-        } else {
-            toast.error({title: '失败', message: data['msg'] + "（错误代码：" + data['code'].toString() + "）", position: 'topCenter'});
-        }
-    })
 }, error_callback = function (data) {
-    layui.use(['toast'], function () {
-        let toast = layui.toast;
-        toast.error({title: '错误', message: "请求出现了异常，请稍后再试......", position: 'topCenter'});
-    })
-}) {
-    layui.use(['jquery'], function () {
-        let $ = layui.jquery
+}, default_action = true) {
+    layui.use(['jquery', 'toast'], function () {
+        let $ = layui.jquery,
+            toast = layui.toast;
         $.ajax({
             url: url,
             type: "post",
             data: data,
             dataType: "json",
             success: function (data) {
+                if (default_action) {
+                    if (data['code'] === 0) {
+                        toast.success({title: '成功', message: data['msg'], position: 'topCenter'});
+                    } else {
+                        toast.error({
+                            title: '失败',
+                            message: data['msg'] + "（错误代码：" + data['code'].toString() + "）",
+                            position: 'topCenter'
+                        });
+                    }
+                }
                 success_callback(data)
             },
             error: function (data) {
+                if (default_action) {
+                    toast.error({title: '错误', message: "请求出现了异常，请稍后再试......", position: 'topCenter'});
+                }
                 error_callback(data)
             }
         });
@@ -73,36 +77,38 @@ function ajax_post_request(url, data, success_callback = function (data) {
  * @param data 数据
  * @param success_callback 成功回调，可为不填
  * @param error_callback 失败回调，可为不填
+ * @param default_action 是否展示自带学校（如果是规定格式的相应，默认为 true）
  * @return 返回有返回对应项，无返回空
  */
 function ajax_get_request(url, data, success_callback = function (data) {
-    layui.use(['toast'], function () {
-        let toast = layui.toast;
-        if (data['code'] === 0) {
-
-            toast.success({title: '成功', message: data['msg'], position: 'topCenter'});
-
-        } else {
-            toast.error({title: '失败', message: data['msg'] + "（错误代码：" + data['code'].toString() + "）", position: 'topCenter'});
-        }
-    })
 }, error_callback = function (data) {
-    layui.use(['toast'], function () {
-        let toast = layui.toast;
-        toast.error({title: '错误', message: "请求出现了异常，请稍后再试......", position: 'topCenter'});
-    })
-}) {
-    layui.use(['jquery'], function () {
-        let $ = layui.jquery
+}, default_action = true) {
+    layui.use(['jquery', 'toast'], function () {
+        let $ = layui.jquery,
+            toast = layui.toast;
         $.ajax({
             url: url,
             type: "get",
             data: data,
             dataType: "json",
             success: function (data) {
+                if (default_action) {
+                    if (data['code'] === 0) {
+                        toast.success({title: '成功', message: data['msg'], position: 'topCenter'});
+                    } else {
+                        toast.error({
+                            title: '失败',
+                            message: data['msg'] + "（错误代码：" + data['code'].toString() + "）",
+                            position: 'topCenter'
+                        });
+                    }
+                }
                 success_callback(data)
             },
             error: function (data) {
+                if (default_action) {
+                    toast.error({title: '错误', message: "请求出现了异常，请稍后再试......", position: 'topCenter'});
+                }
                 error_callback(data)
             }
         });
