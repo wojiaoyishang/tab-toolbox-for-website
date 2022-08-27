@@ -1,3 +1,5 @@
+import ctypes
+import inspect
 import os
 
 import sqlite3
@@ -198,3 +200,25 @@ def exception_detail(e: any) -> str:
     info += 'repr(e):\t' + repr(e)
     info += 'traceback.format_exc():\n%s' + traceback.format_exc()
     return info
+
+
+def _async_raise(tid, exctype):
+    """raises the exception, performs cleanup if needed"""
+    tid = ctypes.c_long(tid)
+    if not inspect.isclass(exctype):
+        exctype = type(exctype)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
+    if res == 0:
+        raise ValueError("invalid thread id")
+    elif res != 1:
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
+
+
+def stop_thread_by_id(ident: int):
+    """
+    通过线程ID强制结束线程，线程ID可以用 thread().ident 获取
+
+    :param ident: 线程 ID
+    """
+    _async_raise(ident, SystemExit)
