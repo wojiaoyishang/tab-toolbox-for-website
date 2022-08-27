@@ -217,7 +217,7 @@ def _async_raise(tid, exctype):
 
 def stop_thread_by_id(ident: int):
     """
-    通过线程ID强制结束线程，线程ID可以用 thread().ident 获取
+    通过线程ID强制结束线程，线程ID可以用 Thread().ident 获取
 
     :param ident: 线程 ID
     """
